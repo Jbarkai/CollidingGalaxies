@@ -1,6 +1,18 @@
-# ToBeNamed
-Modelling and Simulation Project: topic to be decided
+# Simulating colliding galaxies
+A galaxy is a large, self-contained mass of stars. A common shape of a galaxy is a bright center with
+spiral arms radiating outward. The sun belongs to the galaxy called the Milky Way. The universe
+contains billions of galaxies . With so many galaxies floating around it is clear that sometimes two
+galaxies collide, often resulting in two deformed galaxies. Prevalent shapes are a disk, bar, spiral or
+ring, for an overview see the Hubble telescope images: http://hubblesite.org/gallery/
+album/galaxy.
 
-## Potential Topics
-1. Neural networks for galaxy morphology prediction ([example paper](https://arxiv.org/pdf/1503.07077.pdf))
-2. Bird Sound Classification using Convolutional Neural Networks ([example paper](http://ceur-ws.org/Vol-1866/paper_143.pdf), [existing app](https://www.audubon.org/news/testing-out-song-sleuth-new-app-identifies-birds-their-calls#:~:text=In%20the%20Field-,Testing%20Out%20Song%20Sleuth%2C%20a%20New%20App%20That%20Identifies%20Birds,of%20200%20common%20bird%20species.))
+Project: simulate the collision of two disk-shaped galaxies in 3D. Experiment with various initial
+conditions, resulting in realistically shaped galaxies. Galaxies typically comprise 1011 stars. It is
+not feasible to do a simulation with that number of stars. Determine experimentally what is feasible.
+An important simplification/approximation is the use of the Barnes-Hut method. The essence of this
+method is that stars are grouped when they are close together. In this way the complexity of the
+algorithm is reduced from N 2 to N.log(N).
+
+Literature:
+1. J. Barnes and P. Hut (December 1986). ”A hierarchical O(N log N) force-calculation algorithm”. Nature 324 (4): 446449.
+Modelling and Simulation Project: topic to be decided
