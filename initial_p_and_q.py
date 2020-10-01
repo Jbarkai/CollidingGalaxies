@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import random
 import ipyvolume as ipv
+from matplotlib.ticker import NullFormatter
 # Secondary imports (can skip)
 
 # Wider notebook:
@@ -36,6 +37,7 @@ import gala.potential as gp
 from gala.units import galactic
 import gala.integrate as gi
 import astropy.coordinates as coord
+
 # Initial condition functions
 def initial_plummer_positions(npoints=1000, M=1e6*u.Msun, b=1*u.kpc, seed=798632):
     """
@@ -68,8 +70,8 @@ def initial_plummer_positions(npoints=1000, M=1e6*u.Msun, b=1*u.kpc, seed=798632
         # Find the escape velocity and x, y and z using generated
         # radius
         Ve = 2**(0.5)*(1+r**2)**(-1/4)
-        z = 0
-        # z = (1-2*x2)*r
+#         z = (1-2*x2)*r
+        z=0
         x = (r**2-z**2)**(0.5)*np.cos(2*np.pi*x3)
         y = (r**2-z**2)**(0.5)*np.sin(2*np.pi*x3)
         x_f.append(x)
@@ -133,21 +135,55 @@ def initial_plummer_velocities(V, M=1e6*u.Msun, b=1*u.kpc):
     V = V*scale.to(u.km/u.s)
     return vx.value, vy.value, vz.value, V.value
 
-# Get intial positions and velocities
-xyz, v_xyz, r, vr = initial_plummer_positions(npoints)
+# Set up galactuc units
+un = gala.units.galactic
+# Choose number of points and size of steps
+# for integration as well as integrator
+npoints=1000
+dt=0.001*u.Gyr
+integ = gi.LeapfrogIntegrator
+# Get intial positions and velocities of galaxy A
+xyz_A, v_xyz_A, r_A, vr_A = initial_plummer_positions(npoints, seed=798632)
+# Get intial positions and velocities of galaxy B
+xyz_B, v_xyz_B, r_B, vr_B = initial_plummer_positions(npoints, seed=9397582)
+# Set up the potentials used
+MW_potential = gp.MilkyWayPotential(units=un)
+# Set up the Hamiltonians for the various potentials used
+MW_Hamiltonian = gp.Hamiltonian(MW_potential)
+w0_A = gd.PhaseSpacePosition(pos=xyz_A, vel=v_xyz_A)
+w0_B = gd.PhaseSpacePosition(pos=xyz_B, vel=v_xyz_B)
+orbit_A = MW_Hamiltonian.integrate_orbit(w0_A, n_steps=5000, dt=dt, Integrator=integ)
+orbit_B = MW_Hamiltonian.integrate_orbit(w0_B, n_steps=5000, dt=dt, Integrator=integ)
+new_init_A_xyz = [orbit_A.x[-1], orbit_A.y[-1], orbit_A.z[-1]]
+new_init_B_xyz = [orbit_B.x[-1], orbit_B.y[-1], orbit_B.z[-1]]
+new_init_A_v_xyz = [orbit_A.v_x[-1], orbit_A.v_y[-1], orbit_A.v_z[-1]]
+new_init_B_v_xyz = [orbit_B.v_x[-1], orbit_B.v_y[-1], orbit_B.v_z[-1]]
+
+# Positions of galaxy A and B
+pos_A = [-80, 0, 0]
+vel_A = [30, 30, 0]
+pos_B = [30, 0, 0]
+vel_B = [-80,80,0]
+new_init_A_xyz = [np.append(new_init_A_xyz[i].value, 0) + pos_A[i] for i in range(3)]*u.kpc
+new_init_A_xyz = [np.append(new_init_A_xyz[i].value, 0) + vel_A[i] for i in range(3)]*u.km/u.s
+new_init_B_xyz = [np.append(new_init_B_xyz[i].value, 0) + pos_B[i] for i in range(3)]*u.kpc
+new_init_B_vxyz = [np.append(new_init_B_vxyz[i].value, 0) + vel_B[i] for i in range(3)]*u.km/u.s
 plt.style.use('dark_background')
 fig,axes = plt.subplots(ncols = 3, figsize=(15,5))
-axes[0].scatter(xyz[0], xyz[1], s=20, marker="*", c="white")
+axes[0].scatter(new_init_A_xyz[0], new_init_A_xyz[1], s=20, marker="*", c="skyblue")
+axes[0].scatter(new_init_B_xyz[0], new_init_B_xyz[1], s=20, marker="*", c="white")
 axes[0].set_xlabel('x')
 axes[0].set_ylabel('y')
-axes[1].scatter(xyz[0], xyz[2], s=20, marker="*", c="white")
+axes[1].scatter(new_init_A_xyz[0], new_init_A_xyz[2], s=20, marker="*", c="skyblue")
+axes[1].scatter(new_init_B_xyz[0], new_init_B_xyz[2], s=20, marker="*", c="white")
 axes[1].set_xlabel('x')
 axes[1].set_ylabel('z')
-axes[2].scatter(xyz[1], xyz[2], s=20, marker="*", c="white")
+axes[2].scatter(new_init_A_xyz[1], new_init_A_xyz[2], s=20, marker="*", c="skyblue")
+axes[2].scatter(new_init_B_xyz[1], new_init_B_xyz[2], s=20, marker="*", c="white")
 axes[2].set_xlabel('y')
 axes[2].set_ylabel('z')
 for i in [0, 1, 2]:
+    axes[i].set_xlim((-100, 100))
     axes[i].xaxis.set_major_formatter(NullFormatter())
     axes[i].yaxis.set_major_formatter(NullFormatter())
 fig.tight_layout()
-# fig.suptitle("Initial Positions using the rejection method")
