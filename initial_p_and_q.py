@@ -156,8 +156,8 @@ orbit_A = MW_Hamiltonian.integrate_orbit(w0_A, n_steps=5000, dt=dt, Integrator=i
 orbit_B = MW_Hamiltonian.integrate_orbit(w0_B, n_steps=5000, dt=dt, Integrator=integ)
 new_init_A_xyz = [orbit_A.x[-1], orbit_A.y[-1], orbit_A.z[-1]]
 new_init_B_xyz = [orbit_B.x[-1], orbit_B.y[-1], orbit_B.z[-1]]
-new_init_A_v_xyz = [orbit_A.v_x[-1], orbit_A.v_y[-1], orbit_A.v_z[-1]]
-new_init_B_v_xyz = [orbit_B.v_x[-1], orbit_B.v_y[-1], orbit_B.v_z[-1]]
+new_init_A_vxyz = [orbit_A.v_x[-1], orbit_A.v_y[-1], orbit_A.v_z[-1]]
+new_init_B_vxyz = [orbit_B.v_x[-1], orbit_B.v_y[-1], orbit_B.v_z[-1]]
 
 # Positions of galaxy A and B
 pos_A = [-80, 0, 0]
@@ -165,7 +165,7 @@ vel_A = [30, 30, 0]
 pos_B = [30, 0, 0]
 vel_B = [-80,80,0]
 new_init_A_xyz = [np.append(new_init_A_xyz[i].value, 0) + pos_A[i] for i in range(3)]*u.kpc
-new_init_A_xyz = [np.append(new_init_A_xyz[i].value, 0) + vel_A[i] for i in range(3)]*u.km/u.s
+new_init_A_vxyz = [np.append(new_init_A_vxyz[i].value, 0) + vel_A[i] for i in range(3)]*u.km/u.s
 new_init_B_xyz = [np.append(new_init_B_xyz[i].value, 0) + pos_B[i] for i in range(3)]*u.kpc
 new_init_B_vxyz = [np.append(new_init_B_vxyz[i].value, 0) + vel_B[i] for i in range(3)]*u.km/u.s
 plt.style.use('dark_background')
@@ -187,3 +187,33 @@ for i in [0, 1, 2]:
     axes[i].xaxis.set_major_formatter(NullFormatter())
     axes[i].yaxis.set_major_formatter(NullFormatter())
 fig.tight_layout()
+w0_A_new = gd.PhaseSpacePosition(pos=new_init_A_xyz, vel=new_init_A_vxyz)
+w0_B_new = gd.PhaseSpacePosition(pos=new_init_B_xyz, vel=new_init_B_vxyz)
+orbit_A_new = MW_Hamiltonian.integrate_orbit(w0_A_new, n_steps=5000, dt=dt, Integrator=integ)
+orbit_B_new = MW_Hamiltonian.integrate_orbit(w0_B_new, n_steps=5000, dt=dt, Integrator=integ)
+
+
+fig, ax = plt.subplots(2, 6, figsize=(35, 10), sharey=True, sharex=True)
+fig.suptitle('Spatial Evolution', y=1.1, fontsize=16)
+# Loop through directions
+dimens = ["x", "y", "z"]
+for k in range(2):
+    # Loop through 5 times
+    for t in range(6):
+        act_t = int(t/0.01) # Get position in array
+        xyzt = orbit_A_new.xyz[k+1][act_t].value # Get y or x positions
+        x = orbit_A_new.x[act_t].value # get x positions
+        xyzt1 = orbit_B_new.xyz[k+1][act_t].value # Get y or x positions
+        x1 = orbit_B_new.x[act_t].value # get x positions
+        # Plot x vs.y or z at given time
+        ax[k][t].scatter(x, xyzt, s=6,
+                         c='white', label="t=%sGyr" %t)
+        ax[k][t].scatter(x1, xyzt1, s=6,
+                         c='skyblue', label="t=%sGyr" %t)
+        ax[k][t].legend(loc='best')
+        ax[k][t].tick_params(axis='x', rotation=90)
+        ax[k][t].set_xlim((-130, 100))
+        ax[k][t].set_ylim((-50, 50))
+    ax[k][0].set_ylabel(r"%s $[kpc]$" %dimens[k+1])
+fig.text(0.5, -0.05, r"x $[kpc]$", ha='center', fontsize=20)
+fig.tight_layout(pad=0.2)
