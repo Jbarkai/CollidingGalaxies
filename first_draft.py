@@ -238,8 +238,7 @@ for t in range(0,N-1):
         masses = mass_t[t]
         accel = GravAccel(points, masses)
     #     kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
-        v_half = vel_t[t] - 0.5*accel*dt
-        vel_t[t+1] = v_half + accel*dt
+        vel_t[t+1] = vel_t[t] + accel*dt
     #     drift step: x(i+1) = x(i) + v(i + 1/2) dt
         pos_t[t+1] = pos_t[t] + vel_t[t+1]*dt
         
