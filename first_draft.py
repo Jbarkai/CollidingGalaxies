@@ -233,10 +233,9 @@ def leapfrog(M_A, M_B, npoints, N=5, dt=2):
     pos_t[0] = ab_pos
     vel_t = np.array([[np.zeros(3) for i in range(len(ab_vel))] for k in range(nt)])
     vel_t[0] = ab_vel
-    mass_t = np.array([np.zeros(len(ab_masses)) for i in range(N)])
+    mass_t = np.array([np.zeros(len(ab_masses)) for i in range(nt)])
     mass_t[0] = ab_masses
-    for t in range(nt):# don't need to updte after last point
-        print(t)
+    for t in range(nt-1):# don't need to updte after last point
         accel = GravAccel(pos_t[t], mass_t[t])
     #     kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
         vel_t[t+1] = vel_t[t] + accel*dt
@@ -244,8 +243,8 @@ def leapfrog(M_A, M_B, npoints, N=5, dt=2):
         pos_t[t+1] = pos_t[t] + vel_t[t+1]*dt
     return pos_t
 
-N = 5
-dt = 0.1
+N = 6
+dt = 0.5
 pos_t = leapfrog(M_A=1e6*u.Msun, M_B=1e6*u.Msun, npoints=1000, N=N, dt=dt)
 plt.style.use('dark_background')
 fig,axes = plt.subplots(ncols = N-1, nrows=2, figsize=(13,4))
@@ -259,15 +258,16 @@ axes[1][0].scatter(pos_t[0].T[0][1001:], pos_t[0].T[2][1001:], s=20, marker="*",
 axes[1][0].set_ylabel('z')
 axes[1][0].xaxis.set_major_formatter(NullFormatter())
 axes[1][0].yaxis.set_major_formatter(NullFormatter())
-for t in range(1, N-1):
-    axes[0][t].scatter(pos_t[t].T[0][1001:], pos_t[t].T[1][1001:], s=20, marker="*", c="skyblue", alpha=0.5)
-    axes[1][t].scatter(pos_t[t].T[0][1001:], pos_t[t].T[2][1001:], s=20, marker="*", c="skyblue", alpha=0.5)
-    axes[0][t].scatter(pos_t[t].T[0][:1001], pos_t[t].T[1][:1001], s=20, marker="*", c="white", alpha=0.5)
-    axes[1][t].scatter(pos_t[t].T[0][:1001], pos_t[t].T[2][:1001], s=20, marker="*", c="white", alpha=0.5)
-    axes[0][t].set_ylim((-8e6*10**((t-1)/2), 8e6*10**((t-1)/2)))
-    axes[0][t].set_xlim((-4e6*10**((t-1)/2), 4e6*10**((t-1)/2)))
-    axes[0][t].xaxis.set_major_formatter(NullFormatter())
-    axes[0][t].yaxis.set_major_formatter(NullFormatter())
-    axes[1][t].xaxis.set_major_formatter(NullFormatter())
-    axes[1][t].yaxis.set_major_formatter(NullFormatter())
+axes[0][0].set_ylim((-20, 20))
+axes[0][0].set_xlim((-20, 20))
+t_range = np.arange(1, (N-1)/dt, ((N-1)/dt)/5)
+for i, t in zip(range(1, 5), t_range):
+    t = int(t)
+    for k in range(2):
+        axes[k][i].scatter(pos_t[t].T[0][1001:], pos_t[t].T[k+1][1001:], s=20, marker="*", c="skyblue")
+        axes[k][i].scatter(pos_t[t].T[0][:1001], pos_t[t].T[k+1][:1001], s=20, marker="*", c="white")
+        axes[k][i].set_ylim((-i*1e6, i*1e6))
+        axes[k][i].set_xlim((-i*1e6, i*1e6))
+        axes[k][i].xaxis.set_major_formatter(NullFormatter())
+        axes[k][i].yaxis.set_major_formatter(NullFormatter())
 fig.tight_layout()
