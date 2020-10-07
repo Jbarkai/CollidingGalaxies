@@ -223,35 +223,51 @@ ab_pos = np.concatenate((xyz_A.T.value, xyz_B.T.value))
 ab_vel = np.concatenate((v_xyz_A.T.value, v_xyz_B.T.value))
 ab_masses = np.repeat((M_A/npoints).value, len(ab_pos))
 
-# p1, v1 = GravAccel(ab_pos, ab_masses, ab_vel)
-N = 5
-dt = 2
-pos_t = np.array([[np.zeros(3) for i in range(len(ab_pos))] for k in range(N-1)])
-pos_t[0] = ab_pos
-vel_t = np.array([[np.zeros(3) for i in range(len(ab_vel))] for k in range(N-1)])
-vel_t[0] = ab_vel
-mass_t = np.array([np.zeros(len(ab_masses)) for i in range(N)])
-mass_t[0] = ab_masses
-for t in range(0,N-1):
-    if t < N-2: # don't need to updte after last point
-        points = pos_t[t]
-        masses = mass_t[t]
-        accel = GravAccel(points, masses)
+def leapfrog(M_A, M_B, npoints, N=5, dt=2):
+    xyz_A, v_xyz_A, xyz_B, v_xyz_B = initial_setup(M_A=M_A, M_B=M_B, npoints=npoints)
+    ab_pos = np.concatenate((xyz_A.T.value, xyz_B.T.value))
+    ab_vel = np.concatenate((v_xyz_A.T.value, v_xyz_B.T.value))
+    ab_masses = np.repeat((M_A/npoints).value, len(ab_pos))
+    nt = int((N-1)/dt)
+    pos_t = np.array([[np.zeros(3) for i in range(len(ab_pos))] for k in range(nt)])
+    pos_t[0] = ab_pos
+    vel_t = np.array([[np.zeros(3) for i in range(len(ab_vel))] for k in range(nt)])
+    vel_t[0] = ab_vel
+    mass_t = np.array([np.zeros(len(ab_masses)) for i in range(N)])
+    mass_t[0] = ab_masses
+    for t in range(nt):# don't need to updte after last point
+        print(t)
+        accel = GravAccel(pos_t[t], mass_t[t])
     #     kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
         vel_t[t+1] = vel_t[t] + accel*dt
     #     drift step: x(i+1) = x(i) + v(i + 1/2) dt
         pos_t[t+1] = pos_t[t] + vel_t[t+1]*dt
-        
+    return pos_t
+
+N = 5
+dt = 0.1
+pos_t = leapfrog(M_A=1e6*u.Msun, M_B=1e6*u.Msun, npoints=1000, N=N, dt=dt)
 plt.style.use('dark_background')
-fig,axes = plt.subplots(ncols = N-1, figsize=(13,4))
-axes[0].scatter(pos_t[0].T[0], pos_t[0].T[1], s=20, marker="*", c="white")
-axes[0].set_ylabel('y')
-axes[0].xaxis.set_major_formatter(NullFormatter())
-axes[0].yaxis.set_major_formatter(NullFormatter())
+fig,axes = plt.subplots(ncols = N-1, nrows=2, figsize=(13,4))
+axes[0][0].scatter(pos_t[0].T[0][:1001], pos_t[0].T[1][:1001], s=20, marker="*", c="white")
+axes[0][0].scatter(pos_t[0].T[0][1001:], pos_t[0].T[1][1001:], s=20, marker="*", c="skyblue")
+axes[0][0].set_ylabel('y')
+axes[0][0].xaxis.set_major_formatter(NullFormatter())
+axes[0][0].yaxis.set_major_formatter(NullFormatter())
+axes[1][0].scatter(pos_t[0].T[0][:1001], pos_t[0].T[2][:1001], s=20, marker="*", c="white")
+axes[1][0].scatter(pos_t[0].T[0][1001:], pos_t[0].T[2][1001:], s=20, marker="*", c="skyblue")
+axes[1][0].set_ylabel('z')
+axes[1][0].xaxis.set_major_formatter(NullFormatter())
+axes[1][0].yaxis.set_major_formatter(NullFormatter())
 for t in range(1, N-1):
-    axes[t].scatter(pos_t[t].T[0], pos_t[t].T[1], s=20, marker="*", c="white")
-    axes[t].set_ylim((-8e6, 8e6))
-    axes[t].set_xlim((-4e6, 4e6))
-    axes[t].xaxis.set_major_formatter(NullFormatter())
-    axes[t].yaxis.set_major_formatter(NullFormatter())
+    axes[0][t].scatter(pos_t[t].T[0][1001:], pos_t[t].T[1][1001:], s=20, marker="*", c="skyblue", alpha=0.5)
+    axes[1][t].scatter(pos_t[t].T[0][1001:], pos_t[t].T[2][1001:], s=20, marker="*", c="skyblue", alpha=0.5)
+    axes[0][t].scatter(pos_t[t].T[0][:1001], pos_t[t].T[1][:1001], s=20, marker="*", c="white", alpha=0.5)
+    axes[1][t].scatter(pos_t[t].T[0][:1001], pos_t[t].T[2][:1001], s=20, marker="*", c="white", alpha=0.5)
+    axes[0][t].set_ylim((-8e6*10**((t-1)/2), 8e6*10**((t-1)/2)))
+    axes[0][t].set_xlim((-4e6*10**((t-1)/2), 4e6*10**((t-1)/2)))
+    axes[0][t].xaxis.set_major_formatter(NullFormatter())
+    axes[0][t].yaxis.set_major_formatter(NullFormatter())
+    axes[1][t].xaxis.set_major_formatter(NullFormatter())
+    axes[1][t].yaxis.set_major_formatter(NullFormatter())
 fig.tight_layout()
