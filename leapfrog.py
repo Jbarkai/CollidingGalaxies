@@ -14,7 +14,7 @@ def leapfrog(xyz_A, xyz_B, v_xyz_A, v_xyz_B, M_A, M_B, npoints, N=5, dt=2):
     vel_t[0] = ab_vel
     mass_t = np.array([ab_masses for i in range(nt)])
     for t in range(nt-1):# don't need to updte after last point
-        accel = [Accel(pos_t[t], mass_t[t], G=c.G) for t in range(nt-1)]
+        accel = Accel(pos_t[t], mass_t[t], G=c.G)
     #     kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
         vel_t[t+1] = vel_t[t] + accel*dt
     #     drift step: x(i+1) = x(i) + v(i + 1/2) dt
