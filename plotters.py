@@ -34,9 +34,11 @@ def plot_evol(pos_t, npoints, N, dt):
     axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=20, marker="*", c="skyblue")
     axes[1][0].set_ylabel('z [kpc]')
     axes[1][0].set_xlabel('x [kpc]')
-    t_range = np.arange(1, (N-1)/dt, ((N-1)/dt)/5)
+    t_range = np.arange(1, N, N/5)
     for i, t in zip(range(1, 5), t_range):
         t = int(t)
+        
+        print(t, dt*t, len(pos_t))
         for k in range(2):
             axes[k][i].scatter(pos_t[t].T[0][1001:], pos_t[t].T[k+1][1001:], s=20, marker="*", c="skyblue")
             axes[k][i].scatter(pos_t[t].T[0][:1001], pos_t[t].T[k+1][:1001], s=20, marker="*", c="white")
