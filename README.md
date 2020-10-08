@@ -28,4 +28,6 @@ pip install scipy==1.2.0
 pip install ipyvolume
 pip install pytest
 pip install random
+pip install numba
+pip install pykdgrav
 ```
