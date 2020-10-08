@@ -1,0 +1,15 @@
+name: GalDyn2020
+channels:
+- defaults
+- conda-forge
+dependencies:
+   - numpy
+   - scipy
+   - matplotlib
+   - jupyter
+   - ipyvolume
+   - pytest
+   - pip
+   - astropy=3.2.3
+   - astro-gala
+   - random

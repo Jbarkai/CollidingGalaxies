@@ -3,7 +3,14 @@ import numpy as np
 import random
 import astropy.units as u
 import astropy.constants as c
-
+import gala
+import astropy.units as u
+import astropy.constants as c
+import gala.dynamics as gd
+import gala.potential as gp
+from gala.units import galactic
+import gala.integrate as gi
+from scipy.spatial.transform import Rotation as R
 # Initial condition functions
 def initial_plummer_positions(npoints, M, b, seed):
     """
@@ -20,8 +27,8 @@ def initial_plummer_positions(npoints, M, b, seed):
     system.
     
     Output:
-    The arrays of the positions and velocities as well
-    as the radii.
+    The arrays of the positions in Kpc and velocities in km/s
+    as well as the radii.
     """
     G=c.G
     x_f, y_f, z_f, r_f, vx_f, vy_f, vz_f, vr_f = [], [], [], [], [], [], [], []
@@ -101,7 +108,8 @@ def initial_plummer_velocities(V, M, b):
     V = V*scale.to(u.km/u.s)
     return vx.value, vy.value, vz.value, V.value
 
-def initial_setup(M_A, M_B, b_A=1*u.kpc, b_B=1*u.kpc, dt=0.001*u.Gyr, n_steps = 5000, npoints=1000):
+def initial_setup(M_A, M_B, b_A=1*u.kpc, b_B=1*u.kpc, theta_A=45, theta_B=0,
+                  dt=0.001*u.Gyr, n_steps = 5000, npoints=1000):
     seed_A = 798632
     seed_B = 9397582
     # Get intial positions and velocities of galaxy A
@@ -115,4 +123,37 @@ def initial_setup(M_A, M_B, b_A=1*u.kpc, b_B=1*u.kpc, dt=0.001*u.Gyr, n_steps = 
     v_xyz_A = [np.append(v_xyz_A_og[i].value, 0) - vel_shift[i] for i in range(3)]*u.km/u.s
     xyz_B = [np.append(xyz_B_og[i].value, 0) - pos_shift[i] for i in range(3)]*u.kpc
     v_xyz_B = [np.append(v_xyz_B_og[i].value, 0) + vel_shift[i] for i in range(3)]*u.km/u.s
-    return xyz_A, v_xyz_A, xyz_B, v_xyz_B
+    # Set up the potentials and hamiltonians
+    un = gala.units.galactic
+    MW_potential_A = gp.MilkyWayPotential(disk=dict(m=M_A), units=un)
+    MW_potential_B = gp.MilkyWayPotential(disk=dict(m=M_B), units=un)
+    MW_Hamiltonian_A = gp.Hamiltonian(MW_potential_A)
+    MW_Hamiltonian_B = gp.Hamiltonian(MW_potential_B)
+    # Evolve orbit of stars in each system (still seperate)
+    w0_A = gd.PhaseSpacePosition(pos=xyz_A, vel=v_xyz_A)
+    w0_B = gd.PhaseSpacePosition(pos=xyz_B, vel=v_xyz_B)
+    integ = gi.LeapfrogIntegrator
+    orbit_A = MW_Hamiltonian_A.integrate_orbit(w0_A, n_steps=n_steps, dt=dt, Integrator=integ)
+    orbit_B = MW_Hamiltonian_B.integrate_orbit(w0_B, n_steps=n_steps, dt=dt, Integrator=integ)
+    # Positions of galaxy A and B
+    pos_A = [-4000, 0, 0]
+    vel_A = [30, 30, 0]
+    pos_B = [4000, 0, 0]
+    vel_B = [0,0,0]
+    #Redefine new initial positions now that star is evolved
+    new_init_A_xyz = [orbit_A.x[-1], orbit_A.y[-1], orbit_A.z[-1]]
+    new_init_B_xyz = [orbit_B.x[-1], orbit_B.y[-1], orbit_B.z[-1]]
+    new_init_A_vxyz = [orbit_A.v_x[-1], orbit_A.v_y[-1], orbit_A.v_z[-1]]
+    new_init_B_vxyz = [orbit_B.v_x[-1], orbit_B.v_y[-1], orbit_B.v_z[-1]]
+    A_xyz = [np.append(new_init_A_xyz[i].value, 0) + pos_A[i] for i in range(3)]*u.kpc
+    A_vxyz = [np.append(new_init_A_vxyz[i].value, 0) + vel_A[i] for i in range(3)]*u.km/u.s
+    B_xyz = [np.append(new_init_B_xyz[i].value, 0) + pos_B[i] for i in range(3)]*u.kpc
+    B_vxyz = [np.append(new_init_B_vxyz[i].value, 0) + vel_B[i] for i in range(3)]*u.km/u.s
+#     Rotate them
+    rot_A = R.from_rotvec(np.radians(theta_A)*np.array([0, 1, 0]))
+    xyz_A_rot = np.array([list(rot_A.apply(i)) for i in A_xyz.T]).T
+    v_xyz_A_rot = np.array([list(rot_A.apply(i)) for i in A_vxyz.T]).T
+    rot_B = R.from_rotvec(np.radians(theta_B)*np.array([0, 1, 0]))
+    xyz_B_rot = np.array([list(rot_B.apply(i)) for i in B_xyz.T]).T
+    v_xyz_B_rot = np.array([list(rot_B.apply(i)) for i in B_vxyz.T]).T
+    return xyz_A_rot, v_xyz_A_rot, xyz_B_rot, v_xyz_B_rot

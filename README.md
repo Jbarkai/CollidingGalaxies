@@ -16,3 +16,16 @@ algorithm is reduced from N 2 to N.log(N).
 Literature:
 1. J. Barnes and P. Hut (December 1986). ”A hierarchical O(N log N) force-calculation algorithm”. Nature 324 (4): 446449.
 Modelling and Simulation Project: topic to be decided
+
+# Package Installation
+```{bash}
+pip install pip
+pip install numpy
+pip install matplotlib
+pip install astropy=3.2.3
+pip install astro-gala
+pip install scipy==1.2.0
+pip install ipyvolume
+pip install pytest
+pip install random
+```
