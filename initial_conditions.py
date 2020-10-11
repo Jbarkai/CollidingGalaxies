@@ -12,7 +12,7 @@ from gala.units import galactic
 import gala.integrate as gi
 from scipy.spatial.transform import Rotation as R
 # Initial condition functions
-def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, x_pos=0,
+def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
                               y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0):
     """
     Input:
@@ -20,6 +20,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, x_pos=0,
     M = The mass of the system
     seed = Seed used for random number generation
     radius = The radius of the system
+    a = The scale length of the system
     x_pos = The x position of the system
     y_pos = The y position of the system
     z_pos = The z position of the system
@@ -48,14 +49,17 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, x_pos=0,
     # For each particle
     for point in range(npoints):
         # Generate random number and equate it to the enclosed mass to find
-        # the radius for the Miyamoto-Nagai potential
-        x1 = np.random.uniform(0, 1)
-        x3 = np.random.uniform(0, 1)
-        r = (x1**(-2/3)-1)**(-0.5)
+        # the radius for the Kuzmin potential
+        while True:
+            x1 = np.random.uniform(0, 1)
+            r = (x1**(1/3)*a.value)*(1-x1**(2/3))**(-0.5)
+            if r < 1:
+                break
         # Calculate x, y and z and move them onto system
+        x3 = np.random.uniform(0, 1)
         z = 0 # setting z=0 for disk
-        x = (r**2-z**2)**(0.5)*np.cos(2*np.pi*x3)
-        y = (r**2-z**2)**(0.5)*np.sin(2*np.pi*x3)
+        x = r*np.cos(2*np.pi*x3)*radius.value
+        y = r*np.sin(2*np.pi*x3)*radius.value
         xyz.append([x+x_pos, y+y_pos, z+z_pos])
         # Use rejection method to generate radial velocity
         # that is within the escape velocity
@@ -73,12 +77,10 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, x_pos=0,
         # Find the x, y and z components of the velocity
         # from the radial velocity
         x7 = np.random.uniform(0, 1)
-        vz = 0 # Set vz = 0 for the disk
-        vx = (V**2-vz**2)**(0.5)*np.cos(2*np.pi*x7)
-        vy = (V**2-vz**2)**(0.5)*np.sin(2*np.pi*x7)
+        vz = 0*v_scale.value # Set vz = 0 for the disk
+        vx = V*np.cos(2*np.pi*x7)*v_scale.value
+        vy = V*np.sin(2*np.pi*x7)*v_scale.value
         # Scale velocity components to the system
         v_xyz.append([vx+x_vel, vy+y_vel, vz+z_vel])
     # Correct shape of arrays
-    xyz = np.array((xyz*radius).value).T
-    v_xyz = np.array((v_xyz*v_scale).value).T
-    return np.array(xyz), np.array(v_xyz)
+    return np.array(xyz).T, np.array(v_xyz).T
