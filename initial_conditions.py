@@ -58,7 +58,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
         rs.append(r+r_shift)
         # Escape velocity v=sqrt(-2Phi)
-        Ve = np.sqrt(2*G.value*M.value)*(r**2+a.value**2)**(-1/4)
+        Ve = np.sqrt(G.value*x1/r)
         # Find the x, y and z components of the velocity
         # from the radial velocity
         vz = 0 # Set vz = 0 for the disk
