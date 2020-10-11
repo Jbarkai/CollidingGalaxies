@@ -2,7 +2,7 @@
 import numpy as np
 from pykdgrav import Accel, Potential, BruteForcePotential, BruteForceAccel
 
-def leapfrog(xyz_A, xyz_B, v_xyz_A, v_xyz_B, M_A, M_B, npoints, N=5, dt=2):
+def leapfrog(xyz_A, xyz_B, v_xyz_A, v_xyz_B, M_A, M_B, npoints, N=5, dt=2, G=1):
     """
     Input:
     xyz_A = The initial positions of system A
@@ -39,7 +39,7 @@ def leapfrog(xyz_A, xyz_B, v_xyz_A, v_xyz_B, M_A, M_B, npoints, N=5, dt=2):
     # For each timestep
     for t in range(N-1):# don't need to updte after last point
         # Calculate acceleration with barnes hut method
-        accel = Accel(pos_t[t], mass_t[t], G=c.G)
+        accel = Accel(pos_t[t], mass_t[t], G=G)
         # kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
         vel_t[t+1] = vel_t[t] + accel*dt
         # drift step: x(i+1) = x(i) + v(i + 1/2) dt
