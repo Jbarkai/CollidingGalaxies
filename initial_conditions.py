@@ -29,6 +29,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
     z_vel = The z velocity of the system
     G = The gravitational constant
     
+    NOTE: positions all in kpc and velocities all in kpc/s
     Finds the initial positions and velocities of a system
     described by a Miyamoto-Nagai profile following Aareseth,
     Henon, Wielen (1974), using the rejection method
@@ -58,13 +59,13 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
         rs.append(r+r_shift)
         # Escape velocity v=sqrt(-2Phi)
-        Vr = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)).to(u.km/u.s).value
+        Vr = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)).to(u.kpc/u.s).value
         V_theta = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)**3).to(1/u.s).value
         # Find the x, y and z components of the velocity
         # from the radial velocity
         vz = 0 # Set vz = 0 for the disk
-        vx = Vr*np.cos(theta)-r*V_theta*np.sin(theta)
-        vy = Vr*np.sin(theta)+r*V_theta*np.cos(theta)
+        vx = (Vr*np.cos(theta)-r*V_theta*np.sin(theta))
+        vy = (Vr*np.sin(theta)+r*V_theta*np.cos(theta))
         # Shift velocity components to the system
         v_xyz.append([vx+x_vel, vy+y_vel, vz+z_vel])
         v_shift = np.linalg.norm([x_vel, y_vel, z_vel])
