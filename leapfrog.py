@@ -1,7 +1,7 @@
 # Primary imports (don't skip)
 from pykdgrav import Accel, Potential, BruteForcePotential, BruteForceAccel
 
-def leapfrog(xyz, v_xyz, masses, npoints, N=5, dt=2, G=1):
+def leapfrog(xyz, v_xyz, masses, npoints, N=5, dt=2, G=c.G):
     """
     Input:
     xyz = The initial positions of the system

@@ -13,7 +13,7 @@ import gala.integrate as gi
 from scipy.spatial.transform import Rotation as Rotation
 # Initial condition functions
 def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
-                              y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0, G=c.G/c.G.value):
+                              y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0, G=c.G):
     """
     Input:
     npoints = The number of particles
@@ -58,8 +58,8 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
         rs.append(r+r_shift)
         # Escape velocity v=sqrt(-2Phi)
-        Vr = np.sqrt(G.value*M_enc/r)
-        V_theta = np.sqrt(G.value*M_enc/r**3)
+        Vr = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)).to(u.km/u.s).value
+        V_theta = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)**3).to(1/u.s).value
         # Find the x, y and z components of the velocity
         # from the radial velocity
         vz = 0 # Set vz = 0 for the disk
