@@ -35,14 +35,7 @@ ab_pos = np.concatenate((xyz_A.T, xyz_B.T))[:2*npoints]
 ab_vel = np.concatenate((v_xyz_A.T, v_xyz_B.T))[:2*npoints]
 # Assume the particles are of equal mass
 #     ab_masses = np.repeat((M_A/npoints), len(ab_pos))
-ab_masses = np.repeat((M_A/1e7), len(ab_pos))
-mass_t = np.array([ab_masses for i in range(N+1)])
-# Setup empty arrays for the length of time
-pos_t = np.array([[np.zeros(3) for i in range(len(ab_pos))] for k in range(N+1)])
-vel_t = np.array([[np.zeros(3) for i in range(len(ab_vel))] for k in range(N+1)])
-# Fill the arrays with initial positions and velocities
-pos_t[0] = ab_pos
-vel_t[0] = ab_vel
+mass_t = np.repeat((M_A/npoints), len(ab_pos))
 print("Time ellapsed = ", N*dt, "Gyr")
 # Run leapfrog of barnes hut
-pos_t, vel_t = leapfrog(pos_t, vel_t, mass_t, npoints=npoints, N=N, dt=dt)
+pos_t, vel_t = leapfrog(ab_pos, ab_vel, mass_t, npoints=npoints, N=N, dt=dt)

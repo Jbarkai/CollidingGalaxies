@@ -10,7 +10,7 @@ import gala.dynamics as gd
 import gala.potential as gp
 from gala.units import galactic
 import gala.integrate as gi
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as Rotation
 # Initial condition functions
 def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
                               y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0, G=c.G/c.G.value):
@@ -45,28 +45,29 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         # Generate random number and equate it to the enclosed mass to find
         # the radius for the Kuzmin potential
         while True:
-            x1 = np.random.uniform(0, M.value)
-            r = ((x1/M.value)**(1/3)*a.value)*(1-(x1/M.value)**(2/3))**(-0.5)
+            M_enc = np.random.uniform(0, M.value)
+            r = ((M_enc/M.value)**(1/3)*a.value)*(1-(M_enc/M.value)**(2/3))**(-0.5)
             if r < radius.value:
                 break
         # Calculate x, y and z and move them onto system
-        x3 = np.random.uniform(0, 1)
+        theta = np.random.uniform(0, 2*np.pi)
         z = 0 # setting z=0 for disk
-        x = r*np.cos(2*np.pi*x3)
-        y = r*np.sin(2*np.pi*x3)
+        x = r*np.cos(theta)
+        y = r*np.sin(theta)
         xyz.append([x+x_pos, y+y_pos, z+z_pos])
         r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
         rs.append(r+r_shift)
         # Escape velocity v=sqrt(-2Phi)
-        Ve = np.sqrt(G.value*x1/r)
+        Vr = np.sqrt(G.value*M_enc/r)
+        V_theta = np.sqrt(G.value*M_enc/r**3)
         # Find the x, y and z components of the velocity
         # from the radial velocity
         vz = 0 # Set vz = 0 for the disk
-        vx = -Ve*y/r
-        vy = Ve*x/r
+        vx = Vr*np.cos(theta)-r*V_theta*np.sin(theta)
+        vy = Vr*np.sin(theta)+r*V_theta*np.cos(theta)
         # Shift velocity components to the system
         v_xyz.append([vx+x_vel, vy+y_vel, vz+z_vel])
         v_shift = np.linalg.norm([x_vel, y_vel, z_vel])
-        vr.append(Ve+v_shift)
+        vr.append(Vr+v_shift)
     # Correct shape of arrays
     return np.array(xyz).T, np.array(v_xyz).T, rs, vr
