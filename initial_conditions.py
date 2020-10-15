@@ -37,7 +37,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
     system.
     
     Output:
-    The arrays of the positions and velocities.
+    The arrays of the positions in kpc and velocities in kpc/s.
     """
     xyz, v_xyz, rs, vr = [], [], [], []
     np.random.seed(seed)
@@ -47,7 +47,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         # the radius for the Kuzmin potential
         while True:
             M_enc = np.random.uniform(0, M.value)
-            r = ((M_enc/M.value)**(1/3)*a.value)*(1-(M_enc/M.value)**(2/3))**(-0.5)
+            r = ((M_enc/M.value)**(1/3.)*a.value)*(1-(M_enc/M.value)**(2/3.))**(-0.5)
             if r < radius.value:
                 break
         # Calculate x, y and z and move them onto system
