@@ -5,10 +5,10 @@ import astropy.constants as c
 def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
     """
     Input:
-    branch = Top branch of the tree to walk through
-    leaf = leaf of the branch
-    theta = theta criterion
-    G = Gravitational constant
+        branch = Top branch of the tree to walk through
+        leaf = leaf of the branch
+        theta = theta criterion
+        G = Gravitational constant
 
     Walks through the tree recursively to caluclate the gravitational
     acceleration at each level
@@ -25,22 +25,17 @@ def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
             for subtree in branch.subtrees: TreeWalk(subtree, leaf, theta, G)
 
 class MakeTree:
-    """
-    Creates a tree with subtrees below each level if more than one particle
-    """
     def __init__(self, center, length, mass, pos, ids, leaves=[]):
         """
         Input:
-        center = Top branch of the tree to walk through
-        length = leaf of the branch
-        mass = theta criterion
-        pos = Gravitational constant
-        ids = 
-        leaves = 
+            center = The center of the domain
+            length = The length of the domain side
+            mass = The mass of the particles
+            pos = The positions of the particles
+            ids = The ids of the nodes
+            leaves = The leaves of the tree
 
         Creates a tree with subtrees below each level if more than one particle
-
-        Output:
             
         """
         m_tot = 0.
@@ -85,16 +80,16 @@ class MakeTree:
 def Accel(pos, mass, theta=0.5, G=c.G):
     """
     Input:
-    pos = The initial positions of the particles
-    mass = The masses of the particles
-    theta = The theta for criterion
-    G = The gravitational constant
-    
+        pos = The initial positions of the particles
+        mass = The masses of the particles
+        theta = The theta for criterion
+        G = The gravitational constant
+        
     Builds an oct tree and loops through the leaves to calculate
     the acceleration at leaf
 
     Output:
-    The array of the accelerations in kpc/s
+        The array of the accelerations in kpc/s^2
     """
     # Spatial extent of first domain that all particles are in
     center = (np.max(pos,axis=0)+np.min(pos,axis=0))/2

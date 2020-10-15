@@ -16,18 +16,18 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
                               y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0, G=c.G):
     """
     Input:
-    npoints = The number of particles
-    M = The mass of the system
-    seed = Seed used for random number generation
-    radius = The radius of the system
-    a = The scale length of the system
-    x_pos = The x position of the system
-    y_pos = The y position of the system
-    z_pos = The z position of the system
-    x_vel = The x velocity of the system
-    y_vel = The y velocity of the system
-    z_vel = The z velocity of the system
-    G = The gravitational constant
+        npoints = The number of particles
+        M = The mass of the system
+        seed = Seed used for random number generation
+        radius = The radius of the system
+        a = The scale length of the system
+        x_pos = The x position of the system
+        y_pos = The y position of the system
+        z_pos = The z position of the system
+        x_vel = The x velocity of the system
+        y_vel = The y velocity of the system
+        z_vel = The z velocity of the system
+        G = The gravitational constant
     
     NOTE: positions all in kpc and velocities all in kpc/s
     Finds the initial positions and velocities of a system
@@ -37,7 +37,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
     system.
     
     Output:
-    The arrays of the positions in kpc and velocities in kpc/s.
+        The arrays of the positions in kpc and velocities in kpc/s.
     """
     xyz, v_xyz, rs, vr = [], [], [], []
     np.random.seed(seed)

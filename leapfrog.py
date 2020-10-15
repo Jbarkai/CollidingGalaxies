@@ -7,11 +7,11 @@ import astropy.constants as c
 def leapfrog(xyz, v_xyz, masses, N=5, dt=2*u.Gyr, G=c.G):
     """
     Input:
-    xyz = The initial positions of the system
-    v_xyz = The initial velocities of the system
-    M = The mass of the system
-    N = number of timesteps
-    dt = change in step
+        xyz = The initial positions of the system
+        v_xyz = The initial velocities of the system
+        M = The mass of the system
+        N = number of timesteps
+        dt = change in step
     
     For each timestep it calculates the gravitational acceleration
     using the barnes hut method and then updates the velocities and
@@ -20,7 +20,7 @@ def leapfrog(xyz, v_xyz, masses, N=5, dt=2*u.Gyr, G=c.G):
     Note: N*dt = time ellapsed
 
     Output:
-    The arrays of positions and velocities at each timestep
+        The arrays of positions and velocities at each timestep
     """
     # Fill the arrays with initial positions and velocities
     pos_t = [xyz]
