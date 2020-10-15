@@ -1,80 +1,111 @@
-"""
-THIS IS NOT MY CODE, IT IS A PLACE-HOLDER FOR MY CODE TO SET UP THE REST OF THE PIPELINE IN THE MEANWHILE
-"""
 import numpy as np
 import astropy.units as u
 import astropy.constants as c
 
-def TreeWalk(node, node0, thetamax=0.7, G=c.G.value):
+def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
     """
-    Adds the contribution to the field at node0's point due to particles in node.
-    Calling this with the topnode as node will walk the tree to calculate the total field at node0.
+    Input:
+    branch = Top branch of the tree to walk through
+    leaf = leaf of the branch
+    theta = theta criterion
+    G = Gravitational constant
+
+    Walks through the tree recursively to caluclate the gravitational
+    acceleration at each level
+    """        
+    s = branch.size # Domain length
+    diff = branch.COM - leaf.COM
+    d = np.sqrt(np.sum((diff)**2)) # Distance from body to domains COM
+    if d > 0:
+        # Decide if domain is big enough:
+        # Theta criterian or only one particle left in domain (no lower branches)
+        if (s/d < theta) or (len(branch.subtrees)==0):
+            leaf.g += G*branch.mass*diff/d**3
+        else: # else reject the domain and divide it even smaller
+            for subtree in branch.subtrees: TreeWalk(subtree, leaf, theta, G)
+
+class MakeTree:
     """
-    dx = node.COM - node0.COM    # vector between nodes' centres of mass
-    r = np.sqrt(np.sum(dx**2))   # distance between them
-    if r>0:
-        # if the node only has one particle or theta is small enough,
-        #  add the field contribution to value stored in node.g
-        if (len(node.children)==0) or (node.size/r < thetamax):
-            node0.g += G * node.mass * dx/r**3
-        else:
-            # otherwise split up the node and repeat
-            for c in node.children: TreeWalk(c, node0, thetamax, G)
+    Creates a tree with subtrees below each level if more than one particle
+    """
+    def __init__(self, center, length, mass, pos, ids, leaves=[]):
+        """
+        Input:
+        center = Top branch of the tree to walk through
+        length = leaf of the branch
+        mass = theta criterion
+        pos = Gravitational constant
+        ids = 
+        leaves = 
 
-class OctNode:
-    """Stores the data for an octree node, and spawns its children if possible"""
-    def __init__(self, center, size, masses, points, ids, leaves=[]):
-        self.center = center                    # center of the node's box
-        self.size = size                        # maximum side length of the box
-        self.children = []                      # start out assuming that the node has no children
- 
-        Npoints = len(points)
- 
-        if Npoints == 1:
-            # if we're down to one point, we need to store stuff in the node
-            leaves.append(self)
-            self.COM = points[0]
-            self.mass = masses[0]
-            self.id = ids[0]
-            self.g = np.zeros(3)        # at each point, we will want the gravitational field
-        else:
-            self.GenerateChildren(points, masses, ids, leaves)     # if we have at least 2 points in the node,
-                                                             # spawn its children
- 
-            # now we can sum the total mass and center of mass hierarchically, visiting each point once!
-            com_total = np.zeros(3) # running total for mass moments to get COM
-            m_total = 0.            # running total for masses
-            for c in self.children:
-                m, com = c.mass, c.COM
-                m_total += m
-                com_total += com * m   # add the moments of each child
-            self.mass = m_total
-            self.COM = com_total / self.mass  
- 
-    def GenerateChildren(self, points, masses, ids, leaves):
-        """Generates the node's children"""
-        octant_index = (points > self.center)  #does all comparisons needed to determine points' octants
-        for i in range(2): #looping over the 8 octants
-            for j in range(2):
-                for k in range(2):
-                    in_octant = np.all(octant_index == np.bool_([i,j,k]), axis=1)
-                    if not np.any(in_octant): continue           # if no particles, don't make a node
-                    dx = 0.5*self.size*(np.array([i,j,k])-0.5)   # offset between parent and child box centers
-                    self.children.append(OctNode(self.center+dx,
-                                                 self.size/2,
-                                                 masses[in_octant],
-                                                 points[in_octant],
-                                                 ids[in_octant],
-                                                 leaves))
+        Creates a tree with subtrees below each level if more than one particle
 
-def GravAccel(points, masses, thetamax=0.7, G=c.G.value):
-    center = (np.max(points,axis=0)+np.min(points,axis=0))/2       #center of bounding box
-    topsize = np.max(np.max(points,axis=0)-np.min(points,axis=0))  #size of bounding box
+        Output:
+            
+        """
+        m_tot = 0.
+        COM_tot = np.zeros(3)
+        self.center = center # center of the domain
+        self.size = length # maximum side length of the domain
+        self.subtrees = [] # start out assuming this is the only level
+        self.id = ids[0]
+        # Check if there is only one particle in the domain
+        if len(pos) == 1:
+            leaves.append(self) # Itself is the last level
+            self.COM = pos[0] # The centre of mass is itself
+            self.mass = mass[0] # Its own mass is the mass in the domain
+            self.g = np.zeros(3) # No gravitational acceleration is nothing since it is alone
+        # Else create lower levels of the tree
+        else:
+            octant_index = (pos > self.center)  #does all comparisons needed to determine points' octants
+            # looping through all 8 octants (domains)
+            for lev1 in range(2):
+                for lev2 in range(2):
+                    for lev3 in range(2):
+                        # Get the indexes of particles in domain
+                        num_particles = np.all(octant_index == np.bool_([lev1,lev2,lev3]), axis=1)
+                        # If no particles in domain don't create tree node
+                        if not np.any(num_particles):
+                            continue
+                        m = mass[num_particles]
+                        dx = 0.5*self.size*(np.array([lev1,lev2,lev3])-0.5)   # offset between parent and child box centers
+                        self.subtrees.append(MakeTree(self.center+dx,
+                                                     self.size/2, # Divide domain in half each time
+                                                     m,
+                                                     pos[num_particles],
+                                                     ids[num_particles],
+                                                     leaves))
+            # Hierarchically sum total mass and COM
+            for subs in self.subtrees:
+                m_tot += subs.mass
+                COM_tot += subs.COM*subs.mass   # add the moments of each child
+            self.mass = m_tot
+            self.COM = COM_tot/self.mass
+
+def Accel(pos, mass, theta=0.5, G=c.G):
+    """
+    Input:
+    pos = The initial positions of the particles
+    mass = The masses of the particles
+    theta = The theta for criterion
+    G = The gravitational constant
+    
+    Builds an oct tree and loops through the leaves to calculate
+    the acceleration at leaf
+
+    Output:
+    The array of the accelerations in kpc/s
+    """
+    # Spatial extent of first domain that all particles are in
+    center = (np.max(pos,axis=0)+np.min(pos,axis=0))/2
+    tot_size = np.max(np.max(pos,axis=0)-np.min(pos,axis=0))
     leaves = []  # want to keep track of leaf nodes
-    topnode = OctNode(center, topsize, masses, points, np.arange(len(masses)), leaves) #build the tree
- 
-    accel = np.empty_like(points)
+    ids = np.arange(len(mass))
+    # Build the tree
+    first_branch = MakeTree(center, tot_size, mass, pos, ids, leaves)
+    accel = np.empty_like(pos)
+    units = ((G/G.value)*u.Msun/u.kpc**2).to(u.kpc/u.s**2)
     for i,leaf in enumerate(leaves):
-        TreeWalk(topnode, leaf, thetamax, G)  # do field summation
-        accel[leaf.id] = leaf.g  # get the stored acceleration
+        TreeWalk(first_branch, leaf, theta, G.value)  # do field summation
+        accel[leaf.id] = leaf.g*units.value  # get the stored acceleration
     return accel

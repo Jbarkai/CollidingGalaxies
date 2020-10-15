@@ -1,6 +1,6 @@
 # Primary imports (don't skip)
 # from pykdgrav import Accel, Potential, BruteForcePotential, BruteForceAccel
-from barnes_hut import GravAccel
+from barnes_hut import Accel
 import astropy.units as u
 import astropy.constants as c
 
@@ -29,7 +29,7 @@ def leapfrog(xyz, v_xyz, masses, N=5, dt=2*u.Gyr, G=c.G):
     # For each timestep
     for t in range(N-1):# don't need to updte after last point
         # Calculate acceleration with barnes hut method
-        accel = GravAccel(pos_t[t], masses, G=G.value)*((G/G.value)*u.Msun/u.kpc**2).to(u.kpc/u.s**2).value
+        accel = Accel(pos_t[t], masses, G=G)
         # kick step: v(i + 1/2) = v(i - 1/2) + a(i) * dt
         vel_t.append(vel_t[t] + accel*dt_in_s)
         # drift step: x(i+1) = x(i) + v(i + 1/2) dt
