@@ -14,13 +14,13 @@ def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
     acceleration at each level
     """        
     s = branch.size # Domain length
-    diff = branch.COM - leaf.COM
-    d = np.sqrt(np.sum((diff)**2)) # Distance from body to domains COM
-    if d > 0:
+    d = branch.COM - leaf.COM # Distance from body to domains COM
+    r = np.sqrt(diff[0]**2+diff[1]**2+diff[2]**2) # magnitude of distance
+    if r > 0: # NOTE: Should this be larger than 1 maybe?
         # Decide if domain is big enough:
         # Theta criterian or only one particle left in domain (no lower branches)
-        if (s/d < theta) or (len(branch.subtrees)==0):
-            leaf.g += G*branch.mass*diff/d**3
+        if (s/r < theta) or (len(branch.subtrees)==0):
+            leaf.g += G*branch.mass*d/r**3
         else: # else reject the domain and divide it even smaller
             for subtree in branch.subtrees: TreeWalk(subtree, leaf, theta, G)
 
