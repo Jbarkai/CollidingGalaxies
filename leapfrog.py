@@ -1,6 +1,6 @@
 # Primary imports (don't skip)
 # from pykdgrav import Accel, Potential, BruteForcePotential, BruteForceAccel
-from barnes_hut import Accel
+from .barnes_hut import Accel
 import astropy.units as u
 import astropy.constants as c
 import numpy as np

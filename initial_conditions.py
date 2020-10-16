@@ -58,16 +58,16 @@ def initial_kuzmin_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos
         y = r*np.sin(theta)
         xyz.append([x+x_pos, y+y_pos, z+z_pos])
         rs.append(r+r_shift)
-        # Escape velocity v=sqrt(-2Phi)
-        Vr = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)).to(u.kpc/u.s).value
+        # Angular velocity
         V_theta = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)**3).to(1/u.s).value
         # Find the x, y and z components of the velocity
-        # from the radial velocity
+        # Set Radial Velocity to 0
         vz = 0 # Set vz = 0 for the disk
-        vx = (Vr*np.cos(theta)-r*V_theta*np.sin(theta))
-        vy = (Vr*np.sin(theta)+r*V_theta*np.cos(theta))
+        vx = (-r*V_theta*np.sin(theta))
+        vy = (+r*V_theta*np.cos(theta))
         # Shift velocity components to the system
         v_xyz.append([vx+x_vel, vy+y_vel, vz+z_vel])
+        Vr = np.linalg.norm([vx, vy, vz])
         v_shift = np.linalg.norm([x_vel, y_vel, z_vel])
         vr.append(Vr+v_shift)
     # Add BH at centre
