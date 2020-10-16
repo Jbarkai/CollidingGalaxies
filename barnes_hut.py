@@ -15,17 +15,18 @@ def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
     """        
     s = branch.size # Domain length
     d = branch.COM - leaf.COM # Distance from body to domains COM
-    r = np.sqrt(diff[0]**2+diff[1]**2+diff[2]**2) # magnitude of distance
-    if r > 0: # NOTE: Should this be larger than 1 maybe?
-        # Decide if domain is big enough:
-        # Theta criterian or only one particle left in domain (no lower branches)
-        if (s/r < theta) or (len(branch.subtrees)==0):
-            leaf.g += G*branch.mass*d/r**3
-        else: # else reject the domain and divide it even smaller
-            for subtree in branch.subtrees: TreeWalk(subtree, leaf, theta, G)
+    r = np.sqrt(d[0]**2+d[1]**2+d[2]**2) # magnitude of distance
+    if r < branch.softening:
+        r = np.sqrt(d[0]**2+d[1]**2+d[2]**2+branch.softening**2) # magnitude of distance
+    # Decide if domain is big enough:
+    # Theta criterian or only one particle left in domain (no lower branches)
+    if (s/r < theta) or (len(branch.subtrees)==0):
+        leaf.g += G*branch.mass*d/r**3
+    else: # else reject the domain and divide it even smaller
+        for subtree in branch.subtrees: TreeWalk(subtree, leaf, theta, G)
 
 class MakeTree:
-    def __init__(self, center, length, mass, pos, ids, leaves=[]):
+    def __init__(self, softening, center, length, mass, pos, ids, leaves=[]):
         """
         Input:
             center = The center of the domain
@@ -44,6 +45,7 @@ class MakeTree:
         self.size = length # maximum side length of the domain
         self.subtrees = [] # start out assuming this is the only level
         self.id = ids[0]
+        self.softening = softening
         # Check if there is only one particle in the domain
         if len(pos) == 1:
             leaves.append(self) # Itself is the last level
@@ -64,7 +66,8 @@ class MakeTree:
                             continue
                         m = mass[num_particles]
                         dx = 0.5*self.size*(np.array([lev1,lev2,lev3])-0.5)   # offset between parent and child box centers
-                        self.subtrees.append(MakeTree(self.center+dx,
+                        self.subtrees.append(MakeTree(self.softening,
+                                                     self.center+dx,
                                                      self.size/2, # Divide domain in half each time
                                                      m,
                                                      pos[num_particles],
@@ -77,7 +80,7 @@ class MakeTree:
             self.mass = m_tot
             self.COM = COM_tot/self.mass
 
-def Accel(pos, mass, theta=0.5, G=c.G):
+def Accel(pos, mass, softening, theta=0.5, G=c.G):
     """
     Input:
         pos = The initial positions of the particles
@@ -97,7 +100,7 @@ def Accel(pos, mass, theta=0.5, G=c.G):
     leaves = []  # want to keep track of leaf nodes
     ids = np.arange(len(mass))
     # Build the tree
-    first_branch = MakeTree(center, tot_size, mass, pos, ids, leaves)
+    first_branch = MakeTree(softening, center, tot_size, mass, pos, ids, leaves)
     accel = np.empty_like(pos)
     units = ((G/G.value)*u.Msun/u.kpc**2).to(u.kpc/u.s**2)
     for i,leaf in enumerate(leaves):

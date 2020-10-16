@@ -35,8 +35,6 @@ def plot_evol(pos_t, npoints, N, dt, lim=35):
     t_range = np.arange(1, N, N/5)
     for i, t in zip(range(1, 5), t_range):
         t = int(t)
-        
-        print(t, dt*t, len(pos_t))
         for k in range(2):
             axes[k][i].scatter(pos_t[t].T[0][1001:], pos_t[t].T[k+1][1001:], s=20, marker="*", c="skyblue")
             axes[k][i].scatter(pos_t[t].T[0][:1001], pos_t[t].T[k+1][:1001], s=20, marker="*", c="maroon")
