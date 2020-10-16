@@ -12,7 +12,7 @@ from gala.units import galactic
 import gala.integrate as gi
 from scipy.spatial.transform import Rotation as Rotation
 # Initial condition functions
-def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
+def initial_kuzmin_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
                               y_pos=0, z_pos=0, x_vel=0, y_vel=0, z_vel=0, G=c.G):
     """
     Input:
@@ -31,7 +31,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
     
     NOTE: positions all in kpc and velocities all in kpc/s
     Finds the initial positions and velocities of a system
-    described by a Miyamoto-Nagai profile following Aareseth,
+    described by a Kuzmin profile following Aareseth,
     Henon, Wielen (1974), using the rejection method
     to find velocities within the escpae velocity of the
     system.
@@ -41,6 +41,7 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
     """
     xyz, v_xyz, rs, vr = [], [], [], []
     np.random.seed(seed)
+    r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
     # For each particle
     for point in range(npoints):
         # Generate random number and equate it to the enclosed mass to find
@@ -56,7 +57,6 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         x = r*np.cos(theta)
         y = r*np.sin(theta)
         xyz.append([x+x_pos, y+y_pos, z+z_pos])
-        r_shift = np.linalg.norm([x_pos, y_pos, z_pos])
         rs.append(r+r_shift)
         # Escape velocity v=sqrt(-2Phi)
         Vr = np.sqrt(G*M_enc*u.Msun/(r*u.kpc)).to(u.kpc/u.s).value
@@ -70,5 +70,9 @@ def initial_plummer_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_po
         v_xyz.append([vx+x_vel, vy+y_vel, vz+z_vel])
         v_shift = np.linalg.norm([x_vel, y_vel, z_vel])
         vr.append(Vr+v_shift)
-    # Correct shape of arrays
+    # Add BH at centre
+    # xyz.append([x_pos, y_pos, z_pos])
+    # v_xyz.append([x_vel, y_vel, z_vel])
+    # rs.append(r_shift)
+    # vr.append(np.sqrt(G*(M/2)/(r_shift*u.kpc)).to(u.kpc/u.s).value)
     return np.array(xyz).T, np.array(v_xyz).T, rs, vr
