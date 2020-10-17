@@ -15,9 +15,9 @@ def TreeWalk(branch, leaf, theta=0.5, G=c.G.value):
     """        
     s = branch.size # Domain length
     d = branch.COM - leaf.COM # Distance from body to domains COM
-    r = np.sqrt(d[0]**2+d[1]**2+d[2]**2) # magnitude of distance
-    if r < branch.softening: # add softening
-        r = np.sqrt(d[0]**2+d[1]**2+d[2]**2+branch.softening**2) # magnitude of distance
+    # r = np.sqrt(d[0]**2+d[1]**2+d[2]**2) # magnitude of distance
+    # if r < branch.softening: # add softening
+    r = np.sqrt(d[0]**2+d[1]**2+d[2]**2+branch.softening**2) # magnitude of distance
     # Decide if domain is big enough:
     # Theta criterian or only one particle left in domain (no lower branches)
     if (s/r < theta) or (len(branch.subtrees)==0):

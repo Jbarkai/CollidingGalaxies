@@ -37,4 +37,5 @@ def leapfrog(xyz, v_xyz, masses, softening, N=5, dt=2*u.Gyr, G=c.G):
         vel_t.append(vel_t[t] + accel*dt_in_s)
         # drift step: x(i+1) = x(i) + v(i + 1/2) dt
         pos_t.append(pos_t[t] + vel_t[t+1]*dt_in_s)
+        print(t/(N-1))
     return pos_t, vel_t, accel_t
