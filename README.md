@@ -46,4 +46,4 @@ This contains all the plotting functions for ease of use.
 6. `__init__.py`
 This allows for the use of the functions in each of these files.
 7. `Videos`
-This folder contains the videos for the three simulations.
+This folder contains the videos for the three simulations.`
