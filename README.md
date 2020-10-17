@@ -1,4 +1,4 @@
-# Simulating colliding galaxies
+# Simulating 2 colliding disk galaxies
 A galaxy is a large, self-contained mass of stars. A common shape of a galaxy is a bright center with
 spiral arms radiating outward. The sun belongs to the galaxy called the Milky Way. The universe
 contains billions of galaxies . With so many galaxies floating around it is clear that sometimes two
@@ -13,12 +13,14 @@ An important simplification/approximation is the use of the Barnes-Hut method. T
 method is that stars are grouped when they are close together. In this way the complexity of the
 algorithm is reduced from N 2 to N.log(N).
 
+This code sets up the initial positions and velocities following a Kuzmin potential's mass distribution. For each time step the acceleration is calculated using the barnes-hut method and then the positions and velocities are updated using a leap frog integration.
+
 Literature:
 1. J. Barnes and P. Hut (December 1986). ”A hierarchical O(N log N) force-calculation algorithm”. Nature 324 (4): 446449.
-Modelling and Simulation Project: topic to be decided
 
-# Package Installation
-```{bash}
+## Setup
+Package Installation
+```
 pip install pip
 pip install numpy
 pip install matplotlib
@@ -28,6 +30,20 @@ pip install scipy==1.2.0
 pip install ipyvolume
 pip install pytest
 pip install random
-pip install numba
-pip install pykdgrav
 ```
+
+## File Setup
+1. `run_merger.py`
+The main file in which the simulation is run for three different collision angles.
+2. `initial_conditions.py`
+This file contains the function which finds the initial positions and velocities of a system described by a Kuzmin profile by first randomly choosing the enclosed mass and using this to find the radial position followed by the cartesian positions and velocities system.
+3. `leapfrog.py`
+This file integrates the orbit of the nbodies by calculating the gravitational acceleration using the barnes hut method for each timestep and then updating the velocities and positions using the Leap Frog method, assuming that the system is self-starting (i.e. that v(t=0)=v(t=1/2)).
+4. `barnes_hut.py`
+This file contains the functions needed for the barnes-hut algorithm to calculate the accelerations for each particle.
+5. `plotters.py`
+This contains all the plotting functions for ease of use.
+6. `__init__.py`
+This allows for the use of the functions in each of these files.
+7. `Videos`
+This folder contains the videos for the three simulations.

@@ -1,6 +1,6 @@
 # Primary imports (don't skip)
 # from pykdgrav import Accel, Potential, BruteForcePotential, BruteForceAccel
-from barnes_hut import Accel
+from .barnes_hut import Accel
 import astropy.units as u
 import astropy.constants as c
 import numpy as np
@@ -37,5 +37,5 @@ def leapfrog(xyz, v_xyz, masses, softening, N=5, dt=2*u.Gyr, G=c.G):
         vel_t.append(vel_t[t] + accel*dt_in_s)
         # drift step: x(i+1) = x(i) + v(i + 1/2) dt
         pos_t.append(pos_t[t] + vel_t[t+1]*dt_in_s)
-        print(t/(N-1))
+        print(t*100/(N-2), "%", end = "\r")
     return pos_t, vel_t, accel_t

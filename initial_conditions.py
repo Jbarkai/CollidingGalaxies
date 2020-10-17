@@ -3,13 +3,6 @@ import numpy as np
 import random
 import astropy.units as u
 import astropy.constants as c
-import gala
-import astropy.units as u
-import astropy.constants as c
-import gala.dynamics as gd
-import gala.potential as gp
-from gala.units import galactic
-import gala.integrate as gi
 from scipy.spatial.transform import Rotation as Rotation
 # Initial condition functions
 def initial_kuzmin_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos=0,
@@ -31,10 +24,9 @@ def initial_kuzmin_positions(npoints, M, seed, radius=15*u.kpc, a=8*u.kpc, x_pos
     
     NOTE: positions all in kpc and velocities all in kpc/s
     Finds the initial positions and velocities of a system
-    described by a Kuzmin profile following Aareseth,
-    Henon, Wielen (1974), using the rejection method
-    to find velocities within the escpae velocity of the
-    system.
+    described by a Kuzmin profile by first randomly choosing
+    the enclosed mass and using this to find the radial position
+    followed by the cartesian positions and velocities.
     
     Output:
         The arrays of the positions in kpc and velocities in kpc/s.
