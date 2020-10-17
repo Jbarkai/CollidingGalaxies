@@ -174,17 +174,6 @@ fig.tight_layout()
 plt.show()
 
 # Scenario 3
-# Get initial positions and velocities of the two systems
-xyz_A, v_xyz_A, rs_A, vr_A = initial_kuzmin_positions(
-    npoints, M=M_A, seed=798632, radius=r_A, a=a_A,
-    x_pos=-r_A.value/2, z_pos=-r_A.value/2, x_vel=A_vel
-)
-xyz_B, v_xyz_B, rs_B, vr_B = initial_kuzmin_positions(
-    npoints, M=M_B, seed=987344, radius=r_B, a=a_B,
-    x_pos=r_B.value/2, z_pos=r_A.value/2, x_vel=B_vel
-)
-rotation1 = R.from_rotvec(np.array([0, np.pi/4, 0]))
-xyz_A = rotation1.apply(xyz_A.T).T
 rotation2 = R.from_rotvec(np.array([0, -np.pi/4, 0]))
 xyz_B = rotation2.apply(xyz_B.T).T
 # Plot initial conditions
