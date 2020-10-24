@@ -6,7 +6,7 @@ import random
 from matplotlib.ticker import NullFormatter
 import astropy.units as u
 import astropy.constants as c
-from plotters import plot_init, plot_evol, plot_init_vels, plot_evol_vels
+from plotters import plot_init_vels, plot_evol
 from initial_conditions import initial_kuzmin_positions
 from scipy.spatial.transform import Rotation as R
 
@@ -65,47 +65,7 @@ print("Time ellapsed = ", N*dt)
 # Run leapfrog of barnes hut
 pos_t, vel_t, accel_t = leapfrog(ab_pos, ab_vel, masses, softening=softening, N=N, dt=dt)
 # Plot evolution of merger
-fig,axes = plt.subplots(ncols = 6, nrows=2, figsize=(50, 20))
-axes[0][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[1][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[0][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[1][npoints:], s=8,
-               color="green")
-axes[0][0].set_ylabel('y [kpc]', fontsize=30)
-axes[0][0].legend(fontsize=30)
-axes[0][0].set_xlabel('x [kpc]', fontsize=30)
-
-axes[1][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[2][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=8,
-               color="green")
-axes[1][0].set_ylabel('z [kpc]', fontsize=30)
-axes[1][0].legend(fontsize=30)
-axes[1][0].set_xlabel('x [kpc]', fontsize=30)
-
-t_range = np.arange(N/5, N+1, N/5)
-lim = 20
-for i, t in zip(range(1, 6), t_range):
-    t = int(t) - 1
-    axes[0][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[1][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[0][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[1][npoints:], s=8,
-                   color="green")
-    axes[0][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[0][i].legend(fontsize=30)
-    axes[0][i].set_xlim((-lim, lim))
-    axes[0][i].set_ylim((-lim, lim))
-    
-    axes[1][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[2][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[1][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[2][npoints:], s=8,
-                   color="green")
-    axes[1][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[1][i].legend(fontsize=30)
-    axes[1][i].set_xlim((-lim, lim))
-    axes[1][i].set_ylim((-lim, lim))
-    lim += 30
-fig.tight_layout()
-plt.show()
+plot_evol(pos_t, npoints, N, dt)
 #####################################################
 # Scenario 2:
 ## Mass ratio 1:1
@@ -120,8 +80,6 @@ xyz_A = rotation.apply(xyz_A.T).T
 v_xyz_A = rotation.apply(v_xyz_A.T).T
 # Plot initial conditions
 plot_init_vels(xyz_A, xyz_B, v_xyz_A, v_xyz_B, lim=30)
-plot_init(xyz_A, xyz_B, lim=30)
-
 # Assume the particles are of equal mass
 masses_A = np.repeat(M_A.value/npoints, npoints)
 # Add BH
@@ -140,71 +98,22 @@ masses = np.array(list(tot_mass_A) + list(tot_mass_B))
 # Run leapfrog of barnes hut
 pos_t, vel_t, accel_t = leapfrog(ab_pos, ab_vel, masses, softening=softening, N=N, dt=dt)
 # Plot evolution of merger
-fig,axes = plt.subplots(ncols = 6, nrows=2, figsize=(50, 20))
-axes[0][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[1][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[0][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[1][npoints:], s=8,
-               color="green")
-axes[0][0].set_ylabel('y [kpc]', fontsize=30)
-axes[0][0].legend(fontsize=30)
-axes[0][0].set_xlabel('x [kpc]', fontsize=30)
-
-axes[1][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[2][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=8,
-               color="green")
-axes[1][0].set_ylabel('z [kpc]', fontsize=30)
-axes[1][0].legend(fontsize=30)
-axes[1][0].set_xlabel('x [kpc]', fontsize=30)
-
-t_range = np.arange(N/5, N+1, N/5)
-lim = 20
-for i, t in zip(range(1, 6), t_range):
-    t = int(t) - 1
-    axes[0][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[1][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[0][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[1][npoints:], s=8,
-                   color="green")
-    axes[0][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[0][i].legend(fontsize=30)
-    axes[0][i].set_xlim((-lim, lim))
-    axes[0][i].set_ylim((-lim, lim))
-    
-    axes[1][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[2][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[1][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[2][npoints:], s=8,
-                   color="green")
-    axes[1][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[1][i].legend(fontsize=30)
-    axes[1][i].set_xlim((-lim, lim))
-    axes[1][i].set_ylim((-lim, lim))
-    lim += 30
-fig.tight_layout()
-plt.show()
+plot_evol(pos_t, npoints, N, dt)
 #####################################################
 # Scenario 3:
 ## Mass ratio 1:1
 ## Radii ratio 1:1
 ## Collision angle pi/2
-xyz_A, v_xyz_A, rs_A, vr_A = initial_kuzmin_positions(
-    npoints, M=M_A, seed=798632, radius=r_A, a=a_A,
-    x_pos=-r_A.value/2, z_pos=-r_A.value/2, x_vel=A_vel
-)
 xyz_B, v_xyz_B, rs_B, vr_B = initial_kuzmin_positions(
     npoints, M=M_B, seed=987344, radius=r_B, a=a_B,
     x_pos=r_B.value/2, z_pos=r_A.value/2, x_vel=B_vel
 )
 # Rotate them
-rotation1 = R.from_rotvec(np.array([0, np.pi/4, 0]))
-xyz_A = rotation1.apply(xyz_A.T).T
-v_xyz_A = rotation1.apply(v_xyz_A.T).T
 rotation2 = R.from_rotvec(np.array([0, -np.pi/4, 0]))
 xyz_B = rotation2.apply(xyz_B.T).T
 v_xyz_B = rotation2.apply(v_xyz_B.T).T
 # Plot initial conditions
 plot_init_vels(xyz_A, xyz_B, v_xyz_A, v_xyz_B, lim=30)
-plot_init(xyz_A, xyz_B, lim=30)
-
 # Assume the particles are of equal mass
 masses_A = np.repeat(M_A.value/npoints, npoints)
 # Add BH
@@ -223,48 +132,7 @@ masses = np.array(list(tot_mass_A) + list(tot_mass_B))
 # Run leapfrog of barnes hut
 pos_t, vel_t, accel_t = leapfrog(ab_pos, ab_vel, masses, softening=softening, N=N, dt=dt)
 # Plot evolution of merger
-fig,axes = plt.subplots(ncols = 6, nrows=2, figsize=(50, 20))
-axes[0][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[1][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[0][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[1][npoints:], s=8,
-               color="green")
-axes[0][0].set_ylabel('y [kpc]', fontsize=30)
-axes[0][0].legend(fontsize=30)
-axes[0][0].set_xlabel('x [kpc]', fontsize=30)
-
-axes[1][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[2][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=8,
-               color="green")
-axes[1][0].set_ylabel('z [kpc]', fontsize=30)
-axes[1][0].legend(fontsize=30)
-axes[1][0].set_xlabel('x [kpc]', fontsize=30)
-
-t_range = np.arange(N/5, N+1, N/5)
-lim = 20
-for i, t in zip(range(1, 6), t_range):
-    t = int(t) - 1
-    axes[0][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[1][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[0][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[1][npoints:], s=8,
-                   color="green")
-    axes[0][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[0][i].legend(fontsize=30)
-    axes[0][i].set_xlim((-lim, lim))
-    axes[0][i].set_ylim((-lim, lim))
-    
-    axes[1][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[2][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[1][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[2][npoints:], s=8,
-                   color="green")
-    axes[1][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[1][i].legend(fontsize=30)
-    axes[1][i].set_xlim((-lim, lim))
-    axes[1][i].set_ylim((-lim, lim))
-    lim += 30
-fig.tight_layout()
-plt.show()
-
+plot_evol(pos_t, npoints, N, dt)
 #####################################################
 # Scenario 4
 ## Mass ratio 1:1
@@ -280,8 +148,6 @@ xyz_B = rotation2.apply(xyz_B.T).T
 v_xyz_B = rotation2.apply(v_xyz_B.T).T
 # Plot initial conditions
 plot_init_vels(xyz_A, xyz_B, v_xyz_A, v_xyz_B, lim=30)
-plot_init(xyz_A, xyz_B, lim=30)
-
 # Assume the particles are of equal mass
 masses_A = np.repeat(M_A.value/npoints, npoints)
 # Add BH
@@ -300,48 +166,7 @@ masses = np.array(list(tot_mass_A) + list(tot_mass_B))
 # Run leapfrog of barnes hut
 pos_t, vel_t, accel_t = leapfrog(ab_pos, ab_vel, masses, softening=softening, N=N, dt=dt)
 # Plot evolution of merger
-fig,axes = plt.subplots(ncols = 6, nrows=2, figsize=(50, 20))
-axes[0][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[1][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[0][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[1][npoints:], s=8,
-               color="green")
-axes[0][0].set_ylabel('y [kpc]', fontsize=30)
-axes[0][0].legend(fontsize=30)
-axes[0][0].set_xlabel('x [kpc]', fontsize=30)
-
-axes[1][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[2][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=8,
-               color="green")
-axes[1][0].set_ylabel('z [kpc]', fontsize=30)
-axes[1][0].legend(fontsize=30)
-axes[1][0].set_xlabel('x [kpc]', fontsize=30)
-
-t_range = np.arange(N/5, N+1, N/5)
-lim = 20
-for i, t in zip(range(1, 6), t_range):
-    t = int(t) - 1
-    axes[0][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[1][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[0][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[1][npoints:], s=8,
-                   color="green")
-    axes[0][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[0][i].legend(fontsize=30)
-    axes[0][i].set_xlim((-lim, lim))
-    axes[0][i].set_ylim((-lim, lim))
-    
-    axes[1][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[2][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[1][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[2][npoints:], s=8,
-                   color="green")
-    axes[1][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[1][i].legend(fontsize=30)
-    axes[1][i].set_xlim((-lim, lim))
-    axes[1][i].set_ylim((-lim, lim))
-    lim += 30
-fig.tight_layout()
-plt.show()
-
+plot_evol(pos_t, npoints, N, dt)
 #####################################################
 # Scenario 5
 ## Mass ratio 1:6
@@ -367,8 +192,6 @@ xyz_B = rotation2.apply(xyz_B.T).T
 v_xyz_B = rotation2.apply(v_xyz_B.T).T
 # Plot initial conditions
 plot_init_vels(xyz_A, xyz_B, v_xyz_A, v_xyz_B, lim=30)
-plot_init(xyz_A, xyz_B, lim=30)
-
 # Assume the particles are of equal mass
 masses_A = np.repeat(M_A.value/npoints, npoints)
 # Add BH
@@ -387,44 +210,4 @@ masses = np.array(list(tot_mass_A) + list(tot_mass_B))
 # Run leapfrog of barnes hut
 pos_t, vel_t, accel_t = leapfrog(ab_pos, ab_vel, masses, softening=softening, N=N, dt=dt)
 # Plot evolution of merger
-fig,axes = plt.subplots(ncols = 6, nrows=2, figsize=(50, 20))
-axes[0][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[1][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[0][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[1][npoints:], s=8,
-               color="green")
-axes[0][0].set_ylabel('y [kpc]', fontsize=30)
-axes[0][0].legend(fontsize=30)
-axes[0][0].set_xlabel('x [kpc]', fontsize=30)
-
-axes[1][0].scatter(pos_t[0].T[0][:npoints], pos_t[0].T[2][:npoints], s=8,
-               color="maroon", label="t=0Gyr")
-axes[1][0].scatter(pos_t[0].T[0][npoints:], pos_t[0].T[2][npoints:], s=8,
-               color="green")
-axes[1][0].set_ylabel('z [kpc]', fontsize=30)
-axes[1][0].legend(fontsize=30)
-axes[1][0].set_xlabel('x [kpc]', fontsize=30)
-
-t_range = np.arange(N/5, N+1, N/5)
-lim = 20
-for i, t in zip(range(1, 6), t_range):
-    t = int(t) - 1
-    axes[0][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[1][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[0][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[1][npoints:], s=8,
-                   color="green")
-    axes[0][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[0][i].legend(fontsize=30)
-    axes[0][i].set_xlim((-lim, lim))
-    axes[0][i].set_ylim((-lim, lim))
-    
-    axes[1][i].scatter(pos_t[t].T[0][:npoints], pos_t[t].T[2][:npoints], s=8,
-                   color="maroon", label="t=%s" %(t*dt))
-    axes[1][i].scatter(pos_t[t].T[0][npoints:], pos_t[t].T[2][npoints:], s=8,
-                   color="green")
-    axes[1][i].set_xlabel('x [kpc]', fontsize=30)
-    axes[1][i].legend(fontsize=30)
-    axes[1][i].set_xlim((-lim, lim))
-    axes[1][i].set_ylim((-lim, lim))
-    lim += 30
-fig.tight_layout()
-plt.show()
+plot_evol(pos_t, npoints, N, dt)

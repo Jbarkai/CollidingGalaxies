@@ -46,4 +46,8 @@ This contains all the plotting functions for ease of use.
 6. `__init__.py`
 This allows for the use of the functions in each of these files.
 7. `Videos`
-This folder contains the videos for the three simulations.`
+This folder contains the videos for the three simulations. It has two subbfolders, which have the videos in the x-y plane and the x-z plane.
+8. `Snapshots`
+This folder contains snapshots for each timstep of each simulation, which are used to make the videos. It has two subbfolders, which have the snapshots in the x-y plane and the x-z plane.
+9. `Figures`
+This folder contains all the figures used in the report, including those displayed in the results.
