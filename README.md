@@ -15,6 +15,8 @@ algorithm is reduced from N 2 to N.log(N).
 
 This code sets up the initial positions and velocities following a Kuzmin potential's mass distribution. For each time step the acceleration is calculated using the barnes-hut method and then the positions and velocities are updated using a leap frog integration.
 
+![alt text](https://github.com/Jbarkai/CollidingGalaxies/raw/master/example.gif "The spatial evolution of the merging between two galaxies of equal mass and a collision angle of $\pi$/2 radians over 100Gyr. The red stars are gravitationally bound to galaxy A and the green stars are bound to galaxy B. Both galaxies consist of 1000 particles. The top row shows the x-y plane, while the bottom row shows the x-z plane, each incriminating in time from left to right with with the time. Notice that as the plots show the evolution with time, from left to right, the axes zoom out with the expansion of the system.")
+
 Literature:
 1. J. Barnes and P. Hut (December 1986). ”A hierarchical O(N log N) force-calculation algorithm”. Nature 324 (4): 446449.
 
